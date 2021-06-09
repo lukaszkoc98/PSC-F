@@ -1,2 +1,2 @@
 # PSC-F
-pcapDotNet
+Czeba zainstalować WinPcap żeby dziaao
