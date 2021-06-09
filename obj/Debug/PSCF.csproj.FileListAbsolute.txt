@@ -1,0 +1,2 @@
+E:\POLSL\PSC-F\PSCF\obj\Debug\PSCF.csprojAssemblyReference.cache
+E:\POLSL\PSC-F\PSCF\obj\Debug\PSCF.csproj.CoreCompileInputs.cache
