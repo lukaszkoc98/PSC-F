@@ -1,35 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PcapDotNet.Core;
+using PcapDotNet.Packets;
 
-namespace PSCF
+namespace ReadingPacketsFromADumpFile
 {
     class Program
     {
         static void Main(string[] args)
         {
-            // Retrieve the device list from the local machine
-            IList<LivePacketDevice> allDevices = LivePacketDevice.AllLocalMachine;
-
-            if (allDevices.Count == 0)
+            // Check command line
+            /*
+            if (args.Length != 1)
             {
-                Console.WriteLine("No interfaces found! Make sure WinPcap is installed.");
+                Console.WriteLine("usage: " + Environment.GetCommandLineArgs()[0] + " <filename>");
                 return;
             }
+            */
+            // Create the offline device
+            //OfflinePacketDevice selectedDevice = new OfflinePacketDevice(args[0]);
+            OfflinePacketDevice selectedDevice = new OfflinePacketDevice("D:/AEiI/sem_6/PSCF/PSC-F/inputFile2.pcap");
 
-            // Print the list
-            for (int i = 0; i != allDevices.Count; ++i)
+            // Open the capture file
+            using (PacketCommunicator communicator =
+                selectedDevice.Open(65536,                                  // portion of the packet to capture
+                                                                            // 65536 guarantees that the whole packet will be captured on all the link layers
+                                    PacketDeviceOpenAttributes.Promiscuous, // promiscuous mode
+                                    1000))                                  // read timeout
             {
-                LivePacketDevice device = allDevices[i];
-                Console.Write((i + 1) + ". " + device.Name);
-                if (device.Description != null)
-                    Console.WriteLine(" (" + device.Description + ")");
-                else
-                    Console.WriteLine(" (No description available)");
+                // Read and dispatch packets until EOF is reached
+                communicator.ReceivePackets(0, DispatcherHandler);
             }
+            Console.ReadKey();
+        }
+
+        private static void DispatcherHandler(Packet packet)
+        {
+            // print packet timestamp and packet length
+            Console.WriteLine(packet.Timestamp.ToString("yyyy-MM-dd hh:mm:ss.fff") + " length:" + packet.Length);
+
+            // Print the packet
+            const int LineLength = 64;
+            for (int i = 0; i != packet.Length; ++i)
+            {
+                Console.Write((packet[i]).ToString("X2"));
+                if ((i + 1) % LineLength == 0)
+                    Console.WriteLine();
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.ReadKey();
         }
     }
 }
